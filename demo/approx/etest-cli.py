@@ -26,25 +26,24 @@ def main(argv):
     print(W.shape)
     print(W)
 
+    batch_size = 2
     nb_nodes = W.shape[0]
     print(nb_nodes)
-    nb_rows = nb_cols = int(math.sqrt(nb_nodes))
-    print(nb_rows, nb_cols)
 
-    l = np.zeros(shape=[nb_rows, nb_cols], dtype='int8')
-    y = np.zeros(shape=[nb_rows, nb_cols], dtype='float32')
+    l = np.zeros(shape=[nb_nodes], dtype='int8')
+    y = np.zeros(shape=[nb_nodes], dtype='float32')
 
-    l[0, 0] = 1
-    y[0, 0] = 1.1
+    l[0] = 1
+    y[0] = 1.1
 
-    l[nb_rows - 1, nb_cols - 1] = 1
-    y[nb_rows - 1, nb_cols - 1] = - 1.0
+    l[nb_nodes - 1] = 1
+    y[nb_nodes - 1] = -1.0
 
     mu, eps = 1.0, 1e-8
 
-    batch_l = np.zeros(shape=[2, nb_nodes], dtype='float32')
-    batch_y = np.zeros(shape=[2, nb_nodes], dtype='float32')
-    batch_W = np.zeros(shape=[2, nb_nodes, nb_nodes], dtype='float32')
+    batch_l = np.zeros(shape=[batch_size, nb_nodes], dtype='float32')
+    batch_y = np.zeros(shape=[batch_size, nb_nodes], dtype='float32')
+    batch_W = np.zeros(shape=[batch_size, nb_nodes, nb_nodes], dtype='float32')
 
     batch_l[0, :] = l.reshape(nb_nodes)
     batch_y[0, :] = y.reshape(nb_nodes)
@@ -52,14 +51,12 @@ def main(argv):
 
     batch_l[1, :] = l.reshape(nb_nodes)
     batch_y[1, :] = y.reshape(nb_nodes)
-    batch_W[1, :, :] = - W
+    batch_W[1, :, :] = -W
 
     l_ph = tf.placeholder('float32', shape=[None, None], name='l')
     y_ph = tf.placeholder('float32', shape=[None, None], name='y')
-
     mu_ph = tf.placeholder('float32', [None], name='mu')
     eps_ph = tf.placeholder('float32', [None], name='eps')
-
     W_ph = tf.placeholder('float32', shape=[None, None, None], name='W')
 
     solver = ExactSolver()
@@ -67,22 +64,22 @@ def main(argv):
     model = GaussianFields(l=l_ph, y=y_ph,
                            mu=mu_ph, W=W_ph, eps=eps_ph,
                            solver=solver)
-
     f_star = model.minimize()
 
     feed_dict = {
-        l_ph: batch_l, y_ph: batch_y, W_ph: batch_W,
+        l_ph: batch_l,
+        y_ph: batch_y,
+        W_ph: batch_W,
         mu_ph: np.array([mu] * 2),
         eps_ph: np.array([eps] * 2),
     }
 
     with tf.Session() as session:
         hd = HintonDiagram()
-
         f_value = session.run(f_star, feed_dict=feed_dict)
-
         f_value_0 = f_value[0, :]
-        print(hd(f_value_0.reshape((nb_rows, nb_cols))))
+        print(f_value_0)
+        # print(hd(f_value_0))   #.reshape((nb_nodes, nb_nodes))))
 
 
 if __name__ == '__main__':
