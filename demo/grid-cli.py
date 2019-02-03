@@ -32,7 +32,12 @@ def main(argv):
     #           for i in range(nb_rows) for j in range(nb_cols)
     #           if i < nb_rows - 1 and j < nb_cols - 1]
 
+    print(len(edges))
+    print(edges[:10])
+
     W = np.zeros(shape=[nb_nodes, nb_nodes], dtype='float32')
+
+    print(W.shape)
 
     for [(i, j), (k, l)] in edges:
         row, col = i * nb_rows + j, k * nb_cols + l

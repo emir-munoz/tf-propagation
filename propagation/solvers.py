@@ -27,6 +27,8 @@ class ExactSolver(ASolver):
         :param B: [BxMxN] TensorFlow Tensor.
         :return: X: [BxMxN] TensorFlow Tensor.
         """
+        A = tf.Print(A, [A], summarize=20)
+        B = tf.Print(B, [B], summarize=20) 
         return tf.matrix_solve_ls(matrix=A, rhs=B)
 
 
